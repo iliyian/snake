@@ -45,7 +45,8 @@ class _MySnakeState extends State<MySnake> {
   final int width = 20, height = 12, siz = 20;
   final int fps = 5;
   int length = 4;
-  bool isPlaying = false, islose = false;
+  double distPerFrame = 0.25;
+  bool isPlaying = false, islose = false, calledMove = false;
 
   FocusNode focusNode = FocusNode();
   Random random = Random();
@@ -96,10 +97,13 @@ class _MySnakeState extends State<MySnake> {
         makeFood();
       }
       data[yy][xx] = length;
+      calledMove = true;
     });
   }
 
   void newGame() {
+    d = 0;
+    length = height ~/ 3;
     focusNode.requestFocus();
     data = List.generate(height, (y) => List.generate(width, (x) => 0));
     int beginy = (height / 2 - length / 2).round(), x = (width / 2).round();
@@ -123,7 +127,7 @@ class _MySnakeState extends State<MySnake> {
         onKey: (event) {
           setState(() {
             print("Pressed ${event.data.keyLabel}");
-            if (!isPlaying || islose) return;
+            if (!isPlaying || islose || !calledMove) return;
             int newd = -1;
             switch (event.data.keyLabel.toLowerCase()) {
               case 'w':
@@ -145,6 +149,7 @@ class _MySnakeState extends State<MySnake> {
                 d == 2 && newd == 0 ||
                 d == 1 && newd == 3 ||
                 d == 3 && newd == 1) return;
+            calledMove = false;
             d = newd;
           });
         },
@@ -204,9 +209,9 @@ class SnakePainter extends CustomPainter {
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        paint.color = data[y][x] > 0 ? Colors.black : Colors.white;
+        paint.color = data[y][x] > 0 ? Colors.purple.shade200 : Colors.white;
         if (data[y][x] == -1) paint.color = Colors.orange;
-        if (data[y][x] == length) paint.color = Colors.blue;
+        if (data[y][x] == length) paint.color = Colors.deepPurple;
         canvas.drawRect(
             Rect.fromLTWH(x * siz.toDouble(), y * siz.toDouble(),
                 siz.toDouble(), siz.toDouble()),
